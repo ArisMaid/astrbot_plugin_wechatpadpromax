@@ -67,5 +67,4 @@ webhook_url = http://<AstrBot机器IP>:6197/webhook/wechatpadpromax
 | `self_wxid` | 空 | 机器人 wxid 覆盖。通常留空，由 webhook payload 自动推断。 |
 | `timeout_seconds` | `15` | AstrBot 调用 WeChatPadProMAX API 的超时时间。远程/代理部署可适当调大。 |
 | `dedupe_cache_size` | `512` | 去重缓存大小，用于避免重复 webhook 投递。 |
-| `diagnostic_latency_log` | `true` | 记录真实消息的 webhook 延迟诊断日志，用于判断延迟来自 WeChatPadProMAX 同步还是 AstrBot/模型回复。 |
-
+| `diagnostic_latency_log` | `true` | 记录真实消息的 webhook 延迟和路由诊断日志。日志会包含 `chat_type`、`group_id`、`sender_id`、`session`，方便区分群成员消息、群系统消息和私聊消息。 |

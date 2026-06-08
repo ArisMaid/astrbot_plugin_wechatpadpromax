@@ -515,6 +515,13 @@ class WechatPadProMaxAdapter(Platform):
             session_id=message.session_id,
             client=self.client,
         )
+        raw_message = (
+            message.raw_message if isinstance(message.raw_message, dict) else {}
+        )
+        route_meta = raw_message.get("_wechatpadpromax_route")
+        if isinstance(route_meta, dict):
+            for key, value in route_meta.items():
+                event.set_extra(f"wechatpadpromax_{key}", value)
         self.commit_event(event)
 
     async def _parse_request_json(
@@ -614,12 +621,43 @@ class WechatPadProMaxAdapter(Platform):
         raw_content = str(
             self._first_value(message, "rawContent", "RawContent", "xml") or ""
         )
-        from_user = str(
-            self._first_value(message, "fromUser", "FromUser", "fromWxid") or ""
+        from_user = self._normalize_id(
+            self._first_value(
+                message,
+                "fromUser",
+                "FromUser",
+                "fromWxid",
+                "FromWxid",
+                "fromUserName",
+                "FromUserName",
+                "FromUsername",
+            )
         )
-        to_user = str(self._first_value(message, "toUser", "ToUser", "toWxid") or "")
+        to_user = self._normalize_id(
+            self._first_value(
+                message,
+                "toUser",
+                "ToUser",
+                "toWxid",
+                "ToWxid",
+                "toUserName",
+                "ToUserName",
+                "ToUsername",
+            )
+        )
+        is_self = self._as_bool(self._first_value(message, "isSelf", "IsSelf"))
         from_nick = str(
-            self._first_value(message, "fromNick", "FromNick", "nickname") or ""
+            self._first_value(
+                message,
+                "senderNick",
+                "SenderNick",
+                "senderNickname",
+                "SenderNickname",
+                "fromNick",
+                "FromNick",
+                "nickname",
+            )
+            or ""
         )
         bot_wxid = str(
             self.config.get("self_wxid")
@@ -633,23 +671,36 @@ class WechatPadProMaxAdapter(Platform):
             logger.debug("[WeChatPadProMAX] skip message without from/to: %s", message)
             return None
 
-        group_id = from_user if self._is_group_id(from_user) else ""
+        group_id = self._group_id_from_message(message, from_user, to_user)
         is_group = bool(group_id)
         sender_id = from_user
         session_id = from_user
         reply_target = from_user
 
         if is_group:
-            sender_id, content = self._split_group_sender(content)
-            sender_id = sender_id or str(
-                self._first_value(message, "senderWxid", "SenderWxid") or from_user
+            sender_id, content = self._group_sender_and_content(
+                message=message,
+                content=content,
+                from_user=from_user,
+                to_user=to_user,
+                group_id=group_id,
+                bot_wxid=bot_wxid,
+                is_self=is_self,
             )
             session_id = group_id
             reply_target = group_id
-        elif self._as_bool(self._first_value(message, "isSelf", "IsSelf")):
+        elif is_self:
             sender_id = bot_wxid
             session_id = to_user or from_user
             reply_target = to_user or from_user
+
+        chat_type = self._chat_type(
+            is_group=is_group,
+            is_self=is_self,
+            group_id=group_id,
+            sender_id=sender_id,
+            bot_wxid=bot_wxid,
+        )
 
         msg_type = str(
             self._first_value(message, "msgType", "MsgType", "Type", "type") or "1"
@@ -665,6 +716,20 @@ class WechatPadProMaxAdapter(Platform):
         abm.raw_message = dict(message)
         abm.raw_message["_webhook_payload"] = payload
         abm.raw_message["_reply_target"] = reply_target
+        abm.raw_message["_chat_type"] = chat_type
+        abm.raw_message["_group_id"] = group_id
+        abm.raw_message["_sender_id"] = sender_id
+        abm.raw_message["_from_user"] = from_user
+        abm.raw_message["_to_user"] = to_user
+        abm.raw_message["_wechatpadpromax_route"] = {
+            "chat_type": chat_type,
+            "group_id": group_id,
+            "sender_id": sender_id,
+            "from_user": from_user,
+            "to_user": to_user,
+            "session_id": session_id,
+            "reply_target": reply_target,
+        }
         abm.message_id = self._message_id(message) or uuid.uuid4().hex
         abm.timestamp = self._message_timestamp(message, payload)
         abm.sender = MessageMember(
@@ -675,7 +740,19 @@ class WechatPadProMaxAdapter(Platform):
         if is_group:
             abm.type = MessageType.GROUP_MESSAGE
             abm.group_id = group_id
-            abm.group = Group(group_id=group_id, group_name=group_id)
+            group_name = str(
+                self._first_value(
+                    message,
+                    "groupNick",
+                    "GroupNick",
+                    "groupName",
+                    "GroupName",
+                    "roomName",
+                    "RoomName",
+                )
+                or group_id
+            )
+            abm.group = Group(group_id=group_id, group_name=group_name)
         else:
             abm.type = MessageType.FRIEND_MESSAGE
         abm.session_id = session_id
@@ -790,12 +867,24 @@ class WechatPadProMaxAdapter(Platform):
             self._first_value(message, "msgType", "MsgType", "Type", "type") or ""
         )
         msg_id = abm.message_id or self._message_id(message) or "-"
+        route_meta = (
+            abm.raw_message.get("_wechatpadpromax_route", {})
+            if isinstance(abm.raw_message, dict)
+            else {}
+        )
         logger.info(
-            "[WeChatPadProMAX] message latency msg_id=%s type=%s "
-            "session=%s message_lag=%.3fs payload_lag=%s",
+            "[WeChatPadProMAX] message route msg_id=%s chat_type=%s "
+            "msg_type=%s group_id=%s sender_id=%s from_user=%s to_user=%s "
+            "session=%s reply_target=%s message_lag=%.3fs payload_lag=%s",
             msg_id,
+            self._log_value(route_meta.get("chat_type")),
             msg_type,
-            abm.session_id,
+            self._log_value(route_meta.get("group_id")),
+            self._log_value(route_meta.get("sender_id")),
+            self._log_value(route_meta.get("from_user")),
+            self._log_value(route_meta.get("to_user")),
+            self._log_value(route_meta.get("session_id") or abm.session_id),
+            self._log_value(route_meta.get("reply_target")),
             delivery_lag,
             f"{payload_lag:.3f}s" if payload_lag is not None else "n/a",
         )
@@ -840,6 +929,100 @@ class WechatPadProMaxAdapter(Platform):
         except Exception:
             return int(time.time())
 
+    def _group_id_from_message(
+        self,
+        message: dict[str, Any],
+        from_user: str,
+        to_user: str,
+    ) -> str:
+        explicit_group = self._first_value(
+            message,
+            "groupId",
+            "GroupId",
+            "groupWxid",
+            "GroupWxid",
+            "roomId",
+            "RoomId",
+            "roomWxid",
+            "RoomWxid",
+            "chatroomId",
+            "ChatroomId",
+            "ChatRoomId",
+            "chatroomWxid",
+            "ChatroomWxid",
+            "ChatRoomWxid",
+        )
+        talker = self._first_value(
+            message,
+            "talker",
+            "Talker",
+            "talkerWxid",
+            "TalkerWxid",
+            "chatUser",
+            "ChatUser",
+        )
+        return self._first_group_id(explicit_group, from_user, to_user, talker)
+
+    def _group_sender_and_content(
+        self,
+        *,
+        message: dict[str, Any],
+        content: str,
+        from_user: str,
+        to_user: str,
+        group_id: str,
+        bot_wxid: str,
+        is_self: bool,
+    ) -> tuple[str, str]:
+        content_sender, clean_content = self._split_group_sender(content)
+        explicit_sender = self._normalize_id(
+            self._first_value(
+                message,
+                "senderWxid",
+                "SenderWxid",
+                "senderUserName",
+                "SenderUserName",
+                "SenderUsername",
+                "actualSender",
+                "ActualSender",
+                "actualUserName",
+                "ActualUserName",
+                "memberWxid",
+                "MemberWxid",
+                "msgSender",
+                "MsgSender",
+                "realFromUser",
+                "RealFromUser",
+            )
+        )
+        candidates = [content_sender, explicit_sender]
+        if from_user and from_user != group_id:
+            candidates.append(from_user)
+        if to_user and to_user not in {group_id, bot_wxid}:
+            candidates.append(to_user)
+        if is_self:
+            candidates.append(bot_wxid)
+
+        sender_id = next((candidate for candidate in candidates if candidate), group_id)
+        return sender_id, clean_content if content_sender else content
+
+    @staticmethod
+    def _chat_type(
+        *,
+        is_group: bool,
+        is_self: bool,
+        group_id: str,
+        sender_id: str,
+        bot_wxid: str,
+    ) -> str:
+        if not is_group:
+            return "self" if is_self else "friend"
+        if is_self or (bot_wxid and sender_id == bot_wxid):
+            return "group_self"
+        if sender_id and sender_id != group_id:
+            return "group_member"
+        return "group_system"
+
     @staticmethod
     def _payload_timestamp(payload: dict[str, Any]) -> float | None:
         value = payload.get("Timestamp") or payload.get("timestamp")
@@ -859,6 +1042,23 @@ class WechatPadProMaxAdapter(Platform):
     @staticmethod
     def _is_group_id(value: str) -> bool:
         return value.endswith("@chatroom")
+
+    @staticmethod
+    def _normalize_id(value: Any) -> str:
+        return str(value or "").strip()
+
+    @classmethod
+    def _first_group_id(cls, *values: Any) -> str:
+        for value in values:
+            normalized = cls._normalize_id(value)
+            if normalized and cls._is_group_id(normalized):
+                return normalized
+        return ""
+
+    @staticmethod
+    def _log_value(value: Any) -> str:
+        text = str(value or "").strip()
+        return text or "-"
 
     @staticmethod
     def _get_dict(source: dict[str, Any], *keys: str) -> dict[str, Any]:

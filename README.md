@@ -113,7 +113,13 @@ webhook_url =
 测试期默认开启 `diagnostic_latency_log`。收到真实微信消息时，插件会记录类似下面的日志：
 
 ```text
-[WeChatPadProMAX] message latency msg_id=... type=1 session=... message_lag=2.345s payload_lag=0.120s
+[WeChatPadProMAX] message route msg_id=... chat_type=group_member msg_type=1 group_id=12345@chatroom sender_id=wxid_xxx from_user=12345@chatroom to_user=wxid_bot session=12345@chatroom reply_target=12345@chatroom message_lag=2.345s payload_lag=0.120s
 ```
 
 其中 `message_lag` 是微信消息时间戳到 AstrBot 收到 webhook 的时间差。如果它很高，瓶颈通常在 WeChatPadProMAX 同步/轮询；如果它很低但回复慢，瓶颈通常在 AstrBot 的规则、模型供应商或发送回复链路。
+
+群聊排查时重点看 `chat_type`、`group_id`、`sender_id` 和 `session`：
+
+- `chat_type=group_member` 表示普通群成员消息，`group_id/session` 是群会话 ID，`sender_id` 是群成员 wxid。
+- `chat_type=group_system` 表示未解析出具体成员的群聊系统类消息。
+- `chat_type=friend` 表示私聊消息。

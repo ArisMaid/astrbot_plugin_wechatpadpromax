@@ -57,7 +57,7 @@ LEGACY_USAGE_NOTE_MARKERS = (
     "astrbot_plugin_wechatpadpromax",
     "Codex",
     "Platform adapter for connecting WeChatPadProMAX to AstrBot.",
-    "0.2.4",
+    "0.2.5",
 )
 class WechatPadProMaxPlugin(star.Star):
     def __init__(self, context: star.Context, config: dict | None = None) -> None:
