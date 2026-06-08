@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+.venv/
+venv/
+env/
+
+.idea/
+.vscode/
+
+*.log
+*.tmp
+
+# AstrBot stores runtime plugin config outside this plugin directory:
+# data/config/astrbot_plugin_wechatpadpromax_config.json
+# Keep real authcode values out of this repository.
+

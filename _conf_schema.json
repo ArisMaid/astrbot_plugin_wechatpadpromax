@@ -1,0 +1,159 @@
+{
+  "usage_note": {
+    "description": "配置说明",
+    "type": "text",
+    "default": "这是 WeChatPadProMAX 的主配置入口。插件会自动创建并维护 AstrBot 内部的 wechatpadpromax 机器人平台配置；迁移时优先备份本插件目录和 data/config/astrbot_plugin_wechatpadpromax_config.json。一般不需要再手动编辑“机器人”页面里的同名平台。"
+  },
+  "manage_platform_config": {
+    "description": "插件托管机器人配置",
+    "type": "bool",
+    "default": true,
+    "hint": "推荐保持开启。开启后插件配置会作为主配置源，启动或重载时自动创建、更新并加载同名 wechatpadpromax 平台；迁移到新机器时主要迁移插件目录和插件配置即可。"
+  },
+  "platform_config_imported": {
+    "description": "已导入旧机器人配置",
+    "type": "bool",
+    "default": false,
+    "invisible": true
+  },
+  "platform_id": {
+    "description": "机器人平台 ID",
+    "type": "string",
+    "default": "wechatpadpromax",
+    "hint": "插件自动生成的 AstrBot 平台 ID。通常保持 wechatpadpromax；只有同一个 AstrBot 里要接多个 WeChatPadProMAX 实例时才需要改。"
+  },
+  "enable": {
+    "description": "启用机器人平台",
+    "type": "bool",
+    "default": true,
+    "hint": "关闭后插件仍安装在 AstrBot 中，但不会启动 wechatpadpromax 平台实例。"
+  },
+  "base_url": {
+    "description": "WeChatPadProMAX API 地址",
+    "type": "string",
+    "default": "http://127.0.0.1:8062",
+    "hint": "AstrBot 访问 WeChatPadProMAX 的 API 地址。两者同机可填 http://127.0.0.1:8062；分机器部署时填 WeChatPadProMAX 机器的局域网或公网地址，例如 http://192.168.31.233:8062。"
+  },
+  "authcode": {
+    "description": "授权码",
+    "type": "string",
+    "default": "",
+    "hint": "WeChatPadProMAX 授权码，用于注册 webhook、启动消息同步和发送回复。属于敏感配置，请不要提交到公开仓库；迁移时放在 data/config/astrbot_plugin_wechatpadpromax_config.json。"
+  },
+  "webhook_url": {
+    "description": "完整 webhook 回调地址",
+    "type": "string",
+    "default": "",
+    "hint": "优先级最高，会直接注册到 WeChatPadProMAX。必须是 WeChatPadProMAX 能访问到的 AstrBot 回调地址。使用统一 webhook 时形如 http://<AstrBot地址>:6185/api/platform/webhook/<uuid>；使用内置 webhook 时形如 http://<AstrBot地址>:6197/webhook/wechatpadpromax。"
+  },
+  "webhook_public_base_url": {
+    "description": "webhook 对外基础地址",
+    "type": "string",
+    "default": "",
+    "hint": "只在 webhook_url 留空时使用。填写 WeChatPadProMAX 能访问到的 AstrBot webhook 基础地址，插件会自动拼接路径。内置 webhook 示例：http://192.168.31.39:6197；统一 webhook 示例：http://192.168.31.39:6185。"
+  },
+  "webhook_secret": {
+    "description": "webhook 密钥",
+    "type": "string",
+    "default": "",
+    "hint": "可选。需要与 WeChatPadProMAX 注册的 secret 一致，用于校验回调签名。"
+  },
+  "webhook_host": {
+    "description": "webhook 监听地址",
+    "type": "string",
+    "default": "0.0.0.0",
+    "hint": "仅内置 webhook 模式使用。AstrBot 本机监听地址；分机器部署时建议 0.0.0.0。使用统一 webhook 模式时此项不会开放额外端口。"
+  },
+  "webhook_port": {
+    "description": "webhook 监听端口",
+    "type": "int",
+    "default": 6197,
+    "hint": "仅内置 webhook 模式使用。需要确保 WeChatPadProMAX 机器能访问该端口；如果不方便开放端口，建议启用统一 webhook 模式走 AstrBot Dashboard 的 6185 端口。"
+  },
+  "webhook_path": {
+    "description": "webhook 路径",
+    "type": "string",
+    "default": "/webhook/wechatpadpromax",
+    "hint": "仅内置 webhook 模式使用。最终地址通常是 webhook_public_base_url + webhook_path。"
+  },
+  "auto_register_webhook": {
+    "description": "自动注册 webhook",
+    "type": "bool",
+    "default": true,
+    "hint": "推荐开启。启用后，适配器启动或重载时会调用 WeChatPadProMAX /Webhook/Set，把 webhook_url 注册到 WeChatPadProMAX。"
+  },
+  "auto_start_heartbeat": {
+    "description": "自动启动心跳",
+    "type": "bool",
+    "default": false,
+    "hint": "默认关闭，避免新部署或重载时自动调用心跳接口。只有你明确需要 WeChatPadProMAX 自动心跳，并确认不会触发风控时再开启。"
+  },
+  "auto_start_sync": {
+    "description": "自动启动消息同步",
+    "type": "bool",
+    "default": true,
+    "hint": "启用后，适配器启动后会调用 WeChatPadProMAX /Msg/StartAutoSync 开始消息同步。授权码未绑定 Wxid 或会话过期时该接口可能返回成功但实际无消息。"
+  },
+  "diagnostic_latency_log": {
+    "description": "记录 webhook 延迟诊断日志",
+    "type": "bool",
+    "default": true,
+    "hint": "测试期建议开启。收到真实消息时会在日志里记录消息时间戳到 AstrBot webhook 的延迟，用于判断是否为 WeChatPadProMAX 轮询同步导致。"
+  },
+  "message_types": {
+    "description": "webhook 事件类型过滤",
+    "type": "list",
+    "default": [
+      "*"
+    ],
+    "hint": "传给 WeChatPadProMAX /Webhook/Set。一般保持 * 即可；只有明确知道 WeChatPadProMAX 的事件类型名称时才建议收窄。"
+  },
+  "accepted_msg_types": {
+    "description": "接收的微信 msgType",
+    "type": "list",
+    "default": [
+      "1",
+      "3",
+      "34",
+      "43",
+      "49"
+    ],
+    "hint": "会转换成 AstrBot 消息的 msgType。默认：1=文本，3=图片，34=语音，43=视频，49=应用消息。"
+  },
+  "include_self_message": {
+    "description": "包含自己发送的消息",
+    "type": "bool",
+    "default": false,
+    "hint": "默认关闭，避免机器人处理自己发出的消息造成循环。调试自发消息或需要同步机器人账号自身消息时再开启。"
+  },
+  "self_wxid": {
+    "description": "机器人 wxid 覆盖",
+    "type": "string",
+    "default": "",
+    "hint": "可选。留空时从 webhook payload 自动推断。"
+  },
+  "timeout_seconds": {
+    "description": "API 超时时间（秒）",
+    "type": "int",
+    "default": 15,
+    "hint": "AstrBot 调用 WeChatPadProMAX API 的超时时间。局域网部署通常 15 秒足够；远程或代理环境可适当调大。"
+  },
+  "dedupe_cache_size": {
+    "description": "去重缓存大小",
+    "type": "int",
+    "default": 512,
+    "hint": "保存最近多少个消息 ID，用于避免 webhook 重复投递。"
+  },
+  "unified_webhook_mode": {
+    "description": "使用 AstrBot 统一 webhook",
+    "type": "bool",
+    "default": false,
+    "hint": "推荐用于分机器部署或不方便开放 6197 端口的场景。启用后通过 AstrBot Dashboard 端口的 /api/platform/webhook/<uuid> 接收回调，而不是使用插件自己的 6197 端口。webhook_uuid 为空时插件会自动生成。"
+  },
+  "webhook_uuid": {
+    "description": "统一 webhook UUID",
+    "type": "string",
+    "default": "",
+    "hint": "启用统一 webhook 模式时使用。留空时插件会自动生成并保存，通常不需要手动修改。"
+  }
+}
