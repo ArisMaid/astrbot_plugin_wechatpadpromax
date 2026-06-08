@@ -1,27 +1,25 @@
 # 配置参数说明
 
-See [PROTOCOL_ANALYSIS.md](PROTOCOL_ANALYSIS.md) for message component support,
-fallback behavior, and the NapCat-like gateway roadmap.
+消息组件支持情况、降级策略和对标 NapCat 的协议端路线见
+[PROTOCOL_ANALYSIS.md](PROTOCOL_ANALYSIS.md)。
 
-## Message send fallback
+## 消息发送降级
 
-| Field | Default | Description |
+| 字段 | 默认值 | 说明 |
 | --- | --- | --- |
-| `unsupported_component_fallback` | `true` | Send unsupported components such as generic files or merged forwards as text summaries instead of silently dropping them. |
-| `forward_fallback_max_chars` | `4000` | Maximum text length for `Node` / `Nodes` merged-forward fallback summaries. |
+| `unsupported_component_fallback` | `true` | 将暂不支持的消息段转成文本发送，例如普通文件、合并转发等，避免 AstrBot 显示已发送但微信侧没有实际内容。 |
+| `forward_fallback_max_chars` | `4000` | `Node` / `Nodes` 合并转发降级为文本摘要时允许的最大字符数。 |
 
-## Inbound media
+## 入站媒体
 
-| Field | Default | Description |
+| 字段 | 默认值 | 说明 |
 | --- | --- | --- |
-| `download_inbound_media` | `true` | Enrich inbound image, voice, video, and file messages through `/Tools/Download*` when the webhook payload does not already contain a usable URL/base64/path. |
-| `inbound_media_fallback_text` | `true` | Keep placeholders such as `[voice]` or `[file:name]` when media cannot be resolved, instead of dropping the message. |
-| `inbound_media_cache_dir` | empty | Optional local cache directory for media that must be materialized as a file. Empty means `data/temp/wechatpadpromax`. |
-| `inbound_media_download_section_len` | `0` | `sectionLen` sent to download APIs. Keep `0` to request the full media length reported by the webhook. |
+| `download_inbound_media` | `true` | 当 webhook 里没有可直接使用的 URL/base64/path 时，尝试通过 `/Tools/Download*` 下载入站图片、语音、视频和文件，并转换成 AstrBot 的富媒体消息段。 |
+| `inbound_media_fallback_text` | `true` | 入站媒体无法解析时保留 `[voice]`、`[file:name]` 等占位文本，而不是静默丢弃消息。 |
+| `inbound_media_cache_dir` | 空 | 可选的本地媒体缓存目录，用于保存必须落盘的媒体，例如视频 base64 或文件附件。留空时使用 `data/temp/wechatpadpromax`。 |
+| `inbound_media_download_section_len` | `0` | 传给下载接口的 `sectionLen`。保持 `0` 表示使用 webhook 里报告的完整媒体大小；只有服务端要求分片下载时才需要改成正数。 |
 
-The adapter first uses media already present in the webhook. It only calls
-WeChatPadProMAX download APIs when a richer AstrBot component cannot be built
-from the webhook itself.
+适配器会优先使用 webhook 中已经携带的媒体引用。只有无法直接构造 AstrBot 富媒体消息段时，才会调用 WeChatPadProMAX 的下载接口。
 
 本文档是插件配置项的“注释版”说明。AstrBot 实际读取的可编辑配置 schema 在 `_conf_schema.json` 中。
 

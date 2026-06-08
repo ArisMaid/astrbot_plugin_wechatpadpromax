@@ -1,24 +1,19 @@
-# WeChatPadProMAX for AstrBot
+# WeChatPadProMAX AstrBot 接入插件
 
-Protocol capability mapping and the NapCat-like gateway roadmap are documented
-in [PROTOCOL_ANALYSIS.md](PROTOCOL_ANALYSIS.md).
+协议能力映射、消息类型支持情况，以及对标 NapCat 的协议端路线记录在
+[PROTOCOL_ANALYSIS.md](PROTOCOL_ANALYSIS.md)。
 
-Current protocol coverage includes text, image, voice/TTS, video, share/location
-best-effort sends, merged-forward text fallback, group route diagnostics, and
-best-effort inbound media enrichment through WeChatPadProMAX `/Tools/Download*`.
+当前插件已支持文本、图片、语音/TTS、视频、链接/位置的尽力发送、合并转发文本降级、群聊路由诊断，以及通过 WeChatPadProMAX `/Tools/Download*` 对入站媒体做尽力增强。
 
-## Update Detection
+## 更新检测
 
-AstrBot's "new version available" badge is based on the selected plugin market
-source, not directly on the repository used for URL installation. For personal
-GitHub installs, add this custom plugin source in the AstrBot plugin market and
-refresh the source:
+AstrBot 的“发现新版本”提示依据当前选中的插件市场源进行版本比较，并不会直接检查链接安装时填写的 GitHub 仓库。个人 GitHub 插件需要在 AstrBot 插件市场中添加下面这个自定义插件源，然后切换到该源并刷新：
 
 ```text
 https://raw.githubusercontent.com/ArisMaid/astrbot_plugin_wechatpadpromax/main/plugin_registry.json
 ```
 
-The installation URL remains:
+插件安装链接仍然使用：
 
 ```text
 https://github.com/ArisMaid/astrbot_plugin_wechatpadpromax
