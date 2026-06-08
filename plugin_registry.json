@@ -1,0 +1,20 @@
+{
+  "astrbot_plugin_wechatpadpromax": {
+    "name": "astrbot_plugin_wechatpadpromax",
+    "display_name": "WeChatPadProMAX",
+    "desc": "Platform adapter for connecting WeChatPadProMAX to AstrBot.",
+    "short_desc": "Connect WeChatPadProMAX webhook messages to AstrBot.",
+    "version": "0.3.1",
+    "author": "Codex",
+    "repo": "https://github.com/ArisMaid/astrbot_plugin_wechatpadpromax",
+    "astrbot_version": ">=4.16,<5",
+    "category": "platform",
+    "tags": [
+      "wechat",
+      "wechatpadpromax",
+      "platform",
+      "adapter"
+    ],
+    "updated_at": "2026-06-09"
+  }
+}

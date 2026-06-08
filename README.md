@@ -7,6 +7,23 @@ Current protocol coverage includes text, image, voice/TTS, video, share/location
 best-effort sends, merged-forward text fallback, group route diagnostics, and
 best-effort inbound media enrichment through WeChatPadProMAX `/Tools/Download*`.
 
+## Update Detection
+
+AstrBot's "new version available" badge is based on the selected plugin market
+source, not directly on the repository used for URL installation. For personal
+GitHub installs, add this custom plugin source in the AstrBot plugin market and
+refresh the source:
+
+```text
+https://raw.githubusercontent.com/ArisMaid/astrbot_plugin_wechatpadpromax/main/plugin_registry.json
+```
+
+The installation URL remains:
+
+```text
+https://github.com/ArisMaid/astrbot_plugin_wechatpadpromax
+```
+
 这个插件把 WeChatPadProMAX 作为 AstrBot 平台适配器接入。
 
 安装链接：
