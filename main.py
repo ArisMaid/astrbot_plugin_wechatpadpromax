@@ -29,6 +29,12 @@ SYNCABLE_PLATFORM_KEYS = (
     "dedupe_cache_size",
     "unified_webhook_mode",
     "webhook_uuid",
+    "unsupported_component_fallback",
+    "forward_fallback_max_chars",
+    "download_inbound_media",
+    "inbound_media_fallback_text",
+    "inbound_media_cache_dir",
+    "inbound_media_download_section_len",
 )
 
 PRESERVE_EMPTY_STRING_KEYS = {
@@ -38,6 +44,7 @@ PRESERVE_EMPTY_STRING_KEYS = {
     "webhook_secret",
     "self_wxid",
     "webhook_uuid",
+    "inbound_media_cache_dir",
 }
 
 MANAGED_USAGE_NOTE = (
@@ -57,7 +64,7 @@ LEGACY_USAGE_NOTE_MARKERS = (
     "astrbot_plugin_wechatpadpromax",
     "Codex",
     "Platform adapter for connecting WeChatPadProMAX to AstrBot.",
-    "0.2.5",
+    "0.3.1",
 )
 class WechatPadProMaxPlugin(star.Star):
     def __init__(self, context: star.Context, config: dict | None = None) -> None:

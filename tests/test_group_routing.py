@@ -24,16 +24,18 @@ def make_adapter() -> WechatPadProMaxAdapter:
 def test_group_sender_prefix_sets_group_session_and_member_sender() -> None:
     adapter = make_adapter()
 
-    abm = adapter._convert_message(
-        {"Wxid": "wxid_bot", "Timestamp": 1_700_000_000},
-        {
-            "msgId": "msg-1",
-            "msgType": 1,
-            "fromUser": "12345@chatroom",
-            "toUser": "wxid_bot",
-            "content": "wxid_member:\nhello from group",
-            "createTime": 1_700_000_000,
-        },
+    abm = asyncio.run(
+        adapter._convert_message(
+            {"Wxid": "wxid_bot", "Timestamp": 1_700_000_000},
+            {
+                "msgId": "msg-1",
+                "msgType": 1,
+                "fromUser": "12345@chatroom",
+                "toUser": "wxid_bot",
+                "content": "wxid_member:\nhello from group",
+                "createTime": 1_700_000_000,
+            },
+        ),
     )
 
     assert abm is not None
@@ -56,16 +58,18 @@ def test_group_sender_prefix_sets_group_session_and_member_sender() -> None:
 def test_group_id_can_come_from_to_user_or_room_field() -> None:
     adapter = make_adapter()
 
-    abm = adapter._convert_message(
-        {"Wxid": "wxid_bot"},
-        {
-            "msgId": "msg-2",
-            "msgType": 1,
-            "fromUser": "wxid_member_2",
-            "toUser": "wxid_bot",
-            "roomWxid": "67890@chatroom",
-            "content": "hello from alternate payload",
-        },
+    abm = asyncio.run(
+        adapter._convert_message(
+            {"Wxid": "wxid_bot"},
+            {
+                "msgId": "msg-2",
+                "msgType": 1,
+                "fromUser": "wxid_member_2",
+                "toUser": "wxid_bot",
+                "roomWxid": "67890@chatroom",
+                "content": "hello from alternate payload",
+            },
+        ),
     )
 
     assert abm is not None
@@ -80,15 +84,17 @@ def test_group_id_can_come_from_to_user_or_room_field() -> None:
 def test_private_message_keeps_friend_session() -> None:
     adapter = make_adapter()
 
-    abm = adapter._convert_message(
-        {"Wxid": "wxid_bot"},
-        {
-            "msgId": "msg-3",
-            "msgType": 1,
-            "fromUser": "wxid_friend",
-            "toUser": "wxid_bot",
-            "content": "hello private",
-        },
+    abm = asyncio.run(
+        adapter._convert_message(
+            {"Wxid": "wxid_bot"},
+            {
+                "msgId": "msg-3",
+                "msgType": 1,
+                "fromUser": "wxid_friend",
+                "toUser": "wxid_bot",
+                "content": "hello private",
+            },
+        ),
     )
 
     assert abm is not None
@@ -101,16 +107,18 @@ def test_private_message_keeps_friend_session() -> None:
 
 def test_route_metadata_is_exposed_on_event_extra() -> None:
     adapter = make_adapter()
-    abm = adapter._convert_message(
-        {"Wxid": "wxid_bot"},
-        {
-            "msgId": "msg-4",
-            "msgType": 1,
-            "fromUser": "12345@chatroom",
-            "toUser": "wxid_bot",
-            "senderWxid": "wxid_member_4",
-            "content": "hello",
-        },
+    abm = asyncio.run(
+        adapter._convert_message(
+            {"Wxid": "wxid_bot"},
+            {
+                "msgId": "msg-4",
+                "msgType": 1,
+                "fromUser": "12345@chatroom",
+                "toUser": "wxid_bot",
+                "senderWxid": "wxid_member_4",
+                "content": "hello",
+            },
+        ),
     )
 
     assert abm is not None

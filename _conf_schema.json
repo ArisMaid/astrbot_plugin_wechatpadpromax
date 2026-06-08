@@ -32,7 +32,7 @@
     "description": "WeChatPadProMAX API 地址",
     "type": "string",
     "default": "http://127.0.0.1:8062",
-    "hint": "AstrBot 访问 WeChatPadProMAX 的 API 地址。两者同机可填 http://127.0.0.1:8062；分机器部署时填 WeChatPadProMAX 机器的局域网或公网地址，例如 http://192.168.31.233:8062。"
+    "hint": "AstrBot 访问 WeChatPadProMAX 的 API 地址。两者同机可填 http://127.0.0.1:8062；分机器部署时填 WeChatPadProMAX 机器的局域网或公网地址，例如 http://192.168.1.20:8062。"
   },
   "authcode": {
     "description": "授权码",
@@ -50,7 +50,7 @@
     "description": "webhook 对外基础地址",
     "type": "string",
     "default": "",
-    "hint": "只在 webhook_url 留空时使用。填写 WeChatPadProMAX 能访问到的 AstrBot webhook 基础地址，插件会自动拼接路径。内置 webhook 示例：http://192.168.31.39:6197；统一 webhook 示例：http://192.168.31.39:6185。"
+    "hint": "只在 webhook_url 留空时使用。填写 WeChatPadProMAX 能访问到的 AstrBot webhook 基础地址，插件会自动拼接路径。内置 webhook 示例：http://192.168.1.10:6197；统一 webhook 示例：http://192.168.1.10:6185。"
   },
   "webhook_secret": {
     "description": "webhook 密钥",
@@ -155,5 +155,41 @@
     "type": "string",
     "default": "",
     "hint": "启用统一 webhook 模式时使用。留空时插件会自动生成并保存，通常不需要手动修改。"
+  },
+  "unsupported_component_fallback": {
+    "description": "不支持消息段转文本",
+    "type": "bool",
+    "default": true,
+    "hint": "启用后，合并转发、普通文件等暂不支持的消息段会发送为文本摘要，避免 AstrBot 显示已发送但微信没有实际内容。"
+  },
+  "forward_fallback_max_chars": {
+    "description": "合并转发摘要最大长度",
+    "type": "int",
+    "default": 4000,
+    "hint": "Node/Nodes 合并转发降级为文本摘要时的最大字符数。微信侧没有通用合并转发发送接口时使用该降级策略。"
+  },
+  "download_inbound_media": {
+    "description": "Download inbound media",
+    "type": "bool",
+    "default": true,
+    "hint": "When enabled, image, voice, video, and file webhook messages are enriched through WeChatPadProMAX /Tools/Download* only when the webhook payload does not already contain a usable URL/base64/path. Disable this if you want webhook-only receive handling."
+  },
+  "inbound_media_fallback_text": {
+    "description": "Fallback inbound media to text",
+    "type": "bool",
+    "default": true,
+    "hint": "When inbound media cannot be resolved, keep visible placeholders such as [image], [voice], [video], or [file:name] instead of dropping the message."
+  },
+  "inbound_media_cache_dir": {
+    "description": "Inbound media cache directory",
+    "type": "string",
+    "default": "",
+    "hint": "Optional local directory used when downloaded media must be written as a file, for example video base64 or file attachments. Leave empty to use AstrBot data/temp/wechatpadpromax."
+  },
+  "inbound_media_download_section_len": {
+    "description": "Inbound download section length",
+    "type": "int",
+    "default": 0,
+    "hint": "sectionLen sent to WeChatPadProMAX download APIs. Keep 0 to request the full media size reported by the webhook; set a positive value only if the service requires chunked downloads in your deployment."
   }
 }

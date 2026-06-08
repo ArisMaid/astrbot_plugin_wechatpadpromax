@@ -1,5 +1,28 @@
 # 配置参数说明
 
+See [PROTOCOL_ANALYSIS.md](PROTOCOL_ANALYSIS.md) for message component support,
+fallback behavior, and the NapCat-like gateway roadmap.
+
+## Message send fallback
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `unsupported_component_fallback` | `true` | Send unsupported components such as generic files or merged forwards as text summaries instead of silently dropping them. |
+| `forward_fallback_max_chars` | `4000` | Maximum text length for `Node` / `Nodes` merged-forward fallback summaries. |
+
+## Inbound media
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `download_inbound_media` | `true` | Enrich inbound image, voice, video, and file messages through `/Tools/Download*` when the webhook payload does not already contain a usable URL/base64/path. |
+| `inbound_media_fallback_text` | `true` | Keep placeholders such as `[voice]` or `[file:name]` when media cannot be resolved, instead of dropping the message. |
+| `inbound_media_cache_dir` | empty | Optional local cache directory for media that must be materialized as a file. Empty means `data/temp/wechatpadpromax`. |
+| `inbound_media_download_section_len` | `0` | `sectionLen` sent to download APIs. Keep `0` to request the full media length reported by the webhook. |
+
+The adapter first uses media already present in the webhook. It only calls
+WeChatPadProMAX download APIs when a richer AstrBot component cannot be built
+from the webhook itself.
+
 本文档是插件配置项的“注释版”说明。AstrBot 实际读取的可编辑配置 schema 在 `_conf_schema.json` 中。
 
 不要把真实 `authcode` 提交到公开仓库。AstrBot 运行时配置会保存在：
@@ -15,7 +38,7 @@ data/config/astrbot_plugin_wechatpadpromax_config.json
 | `manage_platform_config` | `true` | 插件配置作为主配置源，自动创建/更新 AstrBot 内部 `wechatpadpromax` 平台配置。推荐保持开启，便于迁移和链接安装。 |
 | `platform_id` | `wechatpadpromax` | AstrBot 内部平台 ID。通常保持默认；只有同一个 AstrBot 接多个 WeChatPadProMAX 实例时才需要改。 |
 | `enable` | `true` | 是否启动插件生成的 AstrBot 平台适配器。 |
-| `base_url` | `http://127.0.0.1:8062` | AstrBot 调用 WeChatPadProMAX 的地址。分机器部署时填 WeChatPadProMAX 机器地址，例如 `http://192.168.31.233:8062`。 |
+| `base_url` | `http://127.0.0.1:8062` | AstrBot 调用 WeChatPadProMAX 的地址。分机器部署时填 WeChatPadProMAX 机器地址，例如 `http://192.168.1.20:8062`。 |
 | `authcode` | 空 | WeChatPadProMAX 授权码。用于注册 webhook、启动同步、发送消息。属于敏感配置。 |
 
 ## Webhook 配置

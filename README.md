@@ -1,5 +1,12 @@
 # WeChatPadProMAX for AstrBot
 
+Protocol capability mapping and the NapCat-like gateway roadmap are documented
+in [PROTOCOL_ANALYSIS.md](PROTOCOL_ANALYSIS.md).
+
+Current protocol coverage includes text, image, voice/TTS, video, share/location
+best-effort sends, merged-forward text fallback, group route diagnostics, and
+best-effort inbound media enrichment through WeChatPadProMAX `/Tools/Download*`.
+
 这个插件把 WeChatPadProMAX 作为 AstrBot 平台适配器接入。
 
 安装链接：
